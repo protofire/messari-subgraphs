@@ -47,7 +47,7 @@ export namespace vaults {
 		let underlying = !underlyingResult.reverted ? underlyingResult.value : Address.fromHexString(ADDRESS_ZERO) as Address
 
 		let controllerAddressResult = contract.try_controller()
-		let controllerAddress = !underlyingResult.reverted ? underlyingResult.value : Address.fromHexString(ADDRESS_ZERO) as Address
+		let controllerAddress = !controllerAddressResult.reverted ? controllerAddressResult.value : Address.fromHexString(ADDRESS_ZERO) as Address
 
 
 		return new VaultValuesResult(
