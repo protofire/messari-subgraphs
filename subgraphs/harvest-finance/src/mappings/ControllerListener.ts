@@ -8,9 +8,7 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void { }
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 	// TODO warp this
-	// 1. save vault entity 
-	// 2. create vault listener
-	// 3. create strategy listener
+
 	let vault = vaults.loadOrCreateVault(call.inputs._vault)
 	let vaultResults = vaults.getValuesForVault(call.inputs._vault)
 	vault.symbol = vaultResults.symbol
