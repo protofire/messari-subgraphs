@@ -16,7 +16,7 @@ export function handleProfitAndBuybackLog(event: ProfitAndBuybackLog): void {
 
 	// TODO calc profit
 
-	let reward = tokens.loadOrCreateRewardToken(rewardTokenAddress, "")
+	let reward = tokens.loadOrCreateRewardToken(rewardTokenAddress, shared.constants.RewardTokenType.BORROW)
 	reward.token = token.id
 	reward.save()
 
