@@ -4,7 +4,7 @@ import { accounts, vaults } from "../modules";
 
 export function handleDeposit(event: Deposit): void {
 
-	let account = accounts.loadOrCreateActiveAccount(event.params.beneficiary)
+	let account = accounts.loadOrCreateActiveAccount(event.params.beneficiary, event.block.timestamp)
 	account.save()
 	// Increase protocl users
 

@@ -1,16 +1,17 @@
-import { log } from "@graphprotocol/graph-ts";
 import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../../generated/ControllerListener/ControllerContract";
-import { Token } from "../../generated/schema";
 import { StrategyListener } from "../../generated/templates";
-import { protocol, shared, tokens, vaultFees, vaults } from "../modules";
+import { accounts, protocol, shared, tokens, vaultFees, vaults } from "../modules";
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void { }
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 	// TODO warp this
-	// 1. save vault entity 
-	// 2. create vault listener
-	// 3. create strategy listener
+
+	let account = accounts.loadOrCreateAccount(call.from) // this should be an eoa
+	account.save()
+	let activeAccount = accounts.loadOrCreateActiveAccount(call.from, call.block.timestamp)
+	activeAccount.save()
+
 	let vault = vaults.loadOrCreateVault(call.inputs._vault)
 	let vaultResults = vaults.getValuesForVault(call.inputs._vault)
 	vault.symbol = vaultResults.symbol

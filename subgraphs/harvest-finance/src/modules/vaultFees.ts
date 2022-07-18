@@ -1,4 +1,5 @@
 import { Address, BigInt } from "@graphprotocol/graph-ts"
+import { integer } from "@protofire/subgraph-toolkit"
 import { ControllerContract } from "../../generated/ControllerListener/ControllerContract"
 import { VaultFee } from "../../generated/schema"
 import { shared } from "./shared"
@@ -17,10 +18,10 @@ export namespace vaultFees {
 
 	export function getValuesForVaultFee(controllerAddress: Address): VaultFeeVaulesResult {
 		let contract = ControllerContract.bind(controllerAddress)
-		let profitSharingDenominator = contract.try_profitSharingDenominator().value;
-		let profitSharingNumerator = contract.try_profitSharingNumerator().value;
-		return new VaultFeeVaulesResult(profitSharingDenominator, profitSharingNumerator)
-
+		return new VaultFeeVaulesResult(
+			shared.readValue<BigInt>(contract.try_profitSharingDenominator(), integer.ZERO),
+			shared.readValue<BigInt>(contract.try_profitSharingNumerator(), integer.ZERO)
+		)
 	}
 
 	export class VaultFeeVaulesResult {
