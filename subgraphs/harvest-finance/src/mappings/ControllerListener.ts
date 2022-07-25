@@ -1,8 +1,13 @@
+import { decimal } from "@protofire/subgraph-toolkit";
 import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../../generated/ControllerListener/ControllerContract";
 import { StrategyListener } from "../../generated/templates";
 import { accounts, protocol, shared, tokens, vaultFees, vaults } from "../modules";
 
-export function handleSharePriceChangeLog(event: SharePriceChangeLog): void { }
+export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
+	let vault = vaults.loadOrCreateVault(event.params.vault)
+	vault.pricePerShare = decimal.fromBigInt(event.params.newSharePrice)
+	vault.save()
+}
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 	// TODO warp this
@@ -16,7 +21,8 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 	let vaultResults = vaults.getValuesForVault(call.inputs._vault)
 	vault.symbol = vaultResults.symbol
 	vault.name = vaultResults.name
-
+	vault.createdTimestamp = call.block.timestamp
+	vault.createdBlockNumber = call.block.number
 
 	let underLyingToken = tokens.setValuesForToken(
 		tokens.loadOrCreateToken(vaultResults.underLyingToken),
@@ -35,6 +41,9 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 	vault.outputToken = fToken.id
 	vault.save()
 
+	// TODO: vault.outputTokenPriceUSD = ?
+	// TODO: vault.outputTokenSupply = ? // contract call
+	// TODO: vault.inputTokenBalance = ?
 	// TODO: if (symbol == 'fUNI-V2') && get explanations
 
 	let vaultFee = vaultFees.loadOrCreateVaultFee(vault.id)

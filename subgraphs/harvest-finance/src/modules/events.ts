@@ -3,6 +3,7 @@ import { Deposit, Withdraw } from "../../generated/schema"
 import { protocol } from "./protocol"
 import { shared } from "./shared"
 
+
 export namespace events {
 
 	export namespace deposits {
