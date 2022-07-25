@@ -6,10 +6,12 @@ import {
   Withdraw as WithdrawEvent,
 } from '../../generated/ControllerListener/VaultContract'
 import { accounts, events, tokens, protocol as protocols } from '../modules'
-import { Vault, Withdraw } from '../../generated/schema'
+import { Vault } from '../../generated/schema'
 import { decimal } from '@protofire/subgraph-toolkit'
 
-import { BigInt, Address, Bytes, log, BigDecimal, ethereum } from '@graphprotocol/graph-ts'
+import { Address, ethereum } from '@graphprotocol/graph-ts'
+import { CallType } from '../../../tokemak/src/common/constants'
+import { updateFinancials } from '../modules/financials'
 
 export function handleWithdraw(event: WithdrawEvent): void {
   let vault = Vault.load(event.address.toHex())
@@ -42,12 +44,17 @@ export function handleWithdraw(event: WithdrawEvent): void {
     withdrawal.amount = event.params.amount
     withdrawal.vault = vault.id
     const amountDecimal = decimal.fromBigInt(event.params.amount, fToken.decimals)
-    withdrawal.amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
+    const amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
+    withdrawal.amountUSD = amountUSD
+
+    protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.minus(amountUSD)
 
     accountFrom.save()
     accountTo.save()
     protocol.save()
     withdrawal.save()
+
+    updateInfomation(event.block, event.transaction.from, event.address, CallType.WITHDRAW)
   }
 }
 
@@ -79,7 +86,10 @@ export function handleDeposit(event: Deposit): void {
     deposit.asset = fToken.id
     deposit.amount = event.params.amount
     const amountDecimal = decimal.fromBigInt(event.params.amount, fToken.decimals)
-    deposit.amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
+    const amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
+    deposit.amountUSD = amountUSD
+
+    protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.plus(amountUSD)
 
     deposit.vault = vault.id
 
@@ -87,7 +97,15 @@ export function handleDeposit(event: Deposit): void {
     accountTo.save()
     protocol.save()
     deposit.save()
+
+    updateInfomation(event.block, event.transaction.from, event.address, CallType.DEPOSIT)
   }
+}
+
+function updateInfomation(_block: ethereum.Block, _from: Address, _vaultAddress: Address, _type: string = ''): void {
+  updateFinancials(_block.number, _block.timestamp)
+  updateUsageMetrics(_block, _from, _type)
+  updateVaultSnapshots(_vaultAddress, _block)
 }
 
 export function handleStrategyAnnounced(event: StrategyAnnounced): void {}
