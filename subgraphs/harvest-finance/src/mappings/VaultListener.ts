@@ -5,10 +5,13 @@ import {
 	StrategyChanged,
 	Withdraw as WithdrawEvent,
 } from '../../generated/ControllerListener/VaultContract'
-import { accounts, events, tokens, protocol as protocols } from '../modules'
+import { accounts, events, tokens, protocol as protocols, vaults } from '../modules'
 import { Vault } from '../../generated/schema'
 import { decimal } from '@protofire/subgraph-toolkit'
 
+export function handleStrategyChanged(event: StrategyChanged): void {
+	// TODO: withDraw all from old strategy to vault // IStrategy(strategy()).withdrawAllToVault();
+}
 
 export function handleWithdraw(event: WithdrawEvent): void {
 	let vault = Vault.load(event.address.toHex())
@@ -93,6 +96,7 @@ export function handleDeposit(event: Deposit): void {
 	}
 }
 
+
+
 export function handleStrategyAnnounced(event: StrategyAnnounced): void { }
-export function handleStrategyChanged(event: StrategyChanged): void { }
 export function handleDoHardWorkCall(call: DoHardWorkCall): void { }
