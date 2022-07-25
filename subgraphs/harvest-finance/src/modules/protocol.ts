@@ -31,16 +31,25 @@ export namespace protocol {
 	}
 
 	export namespace mutations {
+
 		export function increaseTotalValueLockedUSD(entity: YieldAggregator, amount: BigDecimal): YieldAggregator {
 			let e = entity
 			e.totalValueLockedUSD = e.totalValueLockedUSD.plus(amount)
 			return e as YieldAggregator
 		}
+
 		export function decreaseTotalValueLockedUSD(entity: YieldAggregator, amount: BigDecimal): YieldAggregator {
 			let e = entity
 			e.totalValueLockedUSD = e.totalValueLockedUSD.minus(amount)
 			return e as YieldAggregator
 		}
+
+		export function updateCumulativeTotalRevenueUSD(entity: YieldAggregator, oldAmount: BigDecimal, newAmount: BigDecimal): YieldAggregator {
+			let e = entity
+			e.cumulativeTotalRevenueUSD = e.totalValueLockedUSD.plus(newAmount.minus(oldAmount))
+			return e as YieldAggregator
+		}
+
 	}
 
 }

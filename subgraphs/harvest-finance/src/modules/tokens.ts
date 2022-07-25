@@ -40,6 +40,10 @@ export namespace tokens {
 		return entity as Token
 	}
 
+	export namespace helpers {
+		export const getUnderlyingUnit = (decimals: i32) => 10 ** decimals;
+	}
+
 	// TODO loadOrCreateRewardToken
 
 	export function getValuesForToken(address: Address): TokenValuesresult {
