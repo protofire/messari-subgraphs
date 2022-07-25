@@ -1,11 +1,20 @@
 import { decimal } from "@protofire/subgraph-toolkit";
 import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../../generated/ControllerListener/ControllerContract";
 import { StrategyListener } from "../../generated/templates";
-import { accounts, protocol, shared, tokens, vaultFees, vaults } from "../modules";
+import { accounts, protocol as protocols, shared, tokens, vaultFees, vaults } from "../modules";
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 	let vault = vaults.loadOrCreateVault(event.params.vault)
 	vault.pricePerShare = decimal.fromBigInt(event.params.newSharePrice)
+
+	// TODO is this calc accurate?
+	let protocol = protocols.loadOrCreateYieldAggregator()
+	protocol = protocols.mutations.updateCumulativeTotalRevenueUSD(
+		protocol,
+		decimal.fromBigInt(event.params.oldSharePrice),
+		decimal.fromBigInt(event.params.newSharePrice),
+	)
+	protocol.save()
 	vault.save()
 }
 
