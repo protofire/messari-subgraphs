@@ -160,6 +160,6 @@ function updateInfomation(_block: ethereum.Block, _from: Address, _vaultAddress:
   vaults.updateVaultSnapshots(_vaultAddress, _block)
 }
 
-export function handleStrategyAnnounced(event: StrategyAnnounced): void {}
-export function handleStrategyChanged(event: StrategyChanged): void {}
-export function handleDoHardWorkCall(call: DoHardWorkCall): void {}
+export function handleStrategyAnnounced(event: StrategyAnnounced): void { }
+export function handleStrategyChanged(event: StrategyChanged): void { }
+export function handleDoHardWorkCall(call: DoHardWorkCall): void { }
