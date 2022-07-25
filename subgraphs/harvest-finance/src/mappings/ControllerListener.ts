@@ -67,7 +67,7 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 	vaultFee.save()
 	vault.save()
 
-	let haverstFinanceOverview = protocol.loadOrCreateYieldAggregator()
+	let haverstFinanceOverview = protocols.loadOrCreateYieldAggregator()
 	haverstFinanceOverview.save()
 
 	StrategyListener.create(call.inputs._strategy)
