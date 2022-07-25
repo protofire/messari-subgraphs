@@ -44,10 +44,10 @@ export namespace vaults {
 	export function getValuesForVault(vaultAddress: Address): VaultValuesResult {
 		let contract = VaultContract.bind(vaultAddress)
 		let underlyingResult = contract.try_underlying()
-		let underlying = !underlyingResult.reverted ? underlyingResult.value : Address.fromHexString(ADDRESS_ZERO) as Address
+		let underlying = !underlyingResult.reverted ? underlyingResult.value : Address.fromString(ADDRESS_ZERO) as Address
 
 		let controllerAddressResult = contract.try_controller()
-		let controllerAddress = !underlyingResult.reverted ? underlyingResult.value : Address.fromHexString(ADDRESS_ZERO) as Address
+		let controllerAddress = !controllerAddressResult.reverted ? controllerAddressResult.value : Address.fromString(ADDRESS_ZERO) as Address
 
 
 		return new VaultValuesResult(
