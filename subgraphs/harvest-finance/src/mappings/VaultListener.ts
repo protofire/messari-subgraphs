@@ -7,6 +7,7 @@ import {
 } from '../../generated/ControllerListener/VaultContract'
 import { accounts, events, tokens, protocol as protocols } from '../modules'
 import { Vault, Withdraw } from '../../generated/schema'
+import { decimal } from '@protofire/subgraph-toolkit'
 
 import { BigInt, Address, Bytes, log, BigDecimal, ethereum } from '@graphprotocol/graph-ts'
 
@@ -39,8 +40,9 @@ export function handleWithdraw(event: WithdrawEvent): void {
     withdrawal.timestamp = event.block.timestamp
     withdrawal.asset = fToken.id
     withdrawal.amount = event.params.amount
-    withdrawal.amountUSD = fToken.lastPriceUSD!.times(new BigDecimal(event.params.amount))
     withdrawal.vault = vault.id
+    const amountDecimal = decimal.fromBigInt(event.params.amount, fToken.decimals)
+    withdrawal.amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
 
     accountFrom.save()
     accountTo.save()
@@ -76,7 +78,9 @@ export function handleDeposit(event: Deposit): void {
     deposit.timestamp = event.block.timestamp
     deposit.asset = fToken.id
     deposit.amount = event.params.amount
-    deposit.amountUSD = fToken.lastPriceUSD!.times(new BigDecimal(event.params.amount))
+    const amountDecimal = decimal.fromBigInt(event.params.amount, fToken.decimals)
+    deposit.amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
+
     deposit.vault = vault.id
 
     accountFrom.save()
