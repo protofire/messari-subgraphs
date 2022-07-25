@@ -58,7 +58,7 @@ export namespace timeSeries {
 			if (entity == null) {
 				entity = new UsageMetricsHourlySnapshot(id)
 				entity.protocol = protocol.getProtocolId(shared.constants.PROTOCOL_ID);
-				entity.hourlyActiveUsers = 0;
+				entity.hourlyActiveUsers = 0; // TODO where to get this?
 				entity.cumulativeUniqueUsers = 0;
 				entity.hourlyTransactionCount = 0;
 				entity.hourlyDepositCount = 0;
@@ -73,7 +73,7 @@ export namespace timeSeries {
 			if (entity == null) {
 				entity = new UsageMetricsDailySnapshot(id)
 				entity.protocol = protocol.getProtocolId(shared.constants.PROTOCOL_ID);
-				entity.dailyActiveUsers = 0;
+				entity.dailyActiveUsers = 0; // TODO where to get this?
 				entity.cumulativeUniqueUsers = 0;
 				entity.dailyTransactionCount = 0;
 				entity.dailyDepositCount = 0;
