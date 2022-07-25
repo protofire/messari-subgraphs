@@ -43,6 +43,8 @@ export function handleWithdraw(event: WithdrawEvent): void {
 		const amountDecimal = decimal.fromBigInt(event.params.amount, fToken.decimals)
 		withdrawal.amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
 
+		protocol = protocols.mutations.decreaseTotalValueLockedUSD(protocol, withdrawal.amountUSD)
+
 		accountFrom.save()
 		accountTo.save()
 		protocol.save()
@@ -81,6 +83,8 @@ export function handleDeposit(event: Deposit): void {
 		deposit.amountUSD = fToken.lastPriceUSD!.times(amountDecimal)
 
 		deposit.vault = vault.id
+
+		protocol = protocols.mutations.increaseTotalValueLockedUSD(protocol, deposit.amountUSD)
 
 		accountFrom.save()
 		accountTo.save()
