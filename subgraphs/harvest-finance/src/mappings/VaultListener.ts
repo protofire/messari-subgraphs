@@ -87,7 +87,7 @@ export function handleDeposit(event: Deposit): void {
 
 
 		// 65:Vault.sol @  uint256 toMint = amount.mul(underlyingUnit()).div(getPricePerFullShare());
-		// amount of vault token to be transffered aka outToken  _mint(beneficiary, toMint);
+		// amount of vault token to be transffered akaoutToken  _mint(beneficiary, toMint);
 		let toMint = decimal.fromBigInt(event.params.amount).times(decimal.fromNumber(
 			tokens.helpers.getUnderlyingUnit(
 				inputToken.decimals

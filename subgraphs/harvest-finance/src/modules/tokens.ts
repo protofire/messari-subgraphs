@@ -41,7 +41,7 @@ export namespace tokens {
 	}
 
 	export namespace helpers {
-		export const getUnderlyingUnit = (decimals: i32) => 10 ** decimals;
+		export const getUnderlyingUnit = (decimals: i32): i32 => 10 ** decimals;
 	}
 
 	// TODO loadOrCreateRewardToken

@@ -1,13 +1,17 @@
+import { Address, Bytes } from "@graphprotocol/graph-ts";
 import { decimal } from "@protofire/subgraph-toolkit";
 import { AddVaultAndStrategyCall, SharePriceChangeLog } from "../../generated/ControllerListener/ControllerContract";
 import { Vault } from "../../generated/schema";
 import { StrategyListener, VaultListener } from "../../generated/templates";
-import { protocol as protocols, tokens, vaults } from "../modules";
+import { oracles, protocol as protocols, tokens, vaults } from "../modules";
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 	let vault = vaults.loadOrCreateVault(event.params.vault)
 	vault.pricePerShare = decimal.fromBigInt(event.params.newSharePrice)
-
+	let tokenAddress = Address.fromBytes(Bytes.fromHexString(vault.inputToken))
+	let underLyingToken = tokens.loadOrCreateToken(tokenAddress)
+	// FIXME: use helper properly
+	underLyingToken.lastPriceUSD = oracles.getUsdPricePerToken(tokenAddress).usdPrice
 	// TODO is this calc accurate?
 	let protocol = protocols.loadOrCreateYieldAggregator()
 	protocol = protocols.mutations.updateCumulativeTotalRevenueUSD(
