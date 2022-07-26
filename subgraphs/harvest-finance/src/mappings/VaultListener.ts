@@ -99,6 +99,7 @@ export function handleDeposit(event: Deposit): void {
     const amountUSD = inputToken.lastPriceUSD!.times(amountDecimal)
     deposit.amountUSD = amountUSD
 
+
     protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.plus(amountUSD)
 
     // 65:Vault.sol @  uint256 toMint = amount.mul(underlyingUnit()).div(getPricePerFullShare());
