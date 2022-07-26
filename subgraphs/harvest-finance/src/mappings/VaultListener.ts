@@ -10,8 +10,10 @@ import { Token, Vault } from '../../generated/schema'
 import { decimal } from '@protofire/subgraph-toolkit'
 
 import { Address, ethereum, BigInt } from '@graphprotocol/graph-ts'
-import { CallType } from '../../../tokemak/src/common/constants'
 import { updateFinancials } from '../modules/financials'
+import { updateUsageMetrics } from '../modules/usage'
+import { vaults } from '../modules/vaults'
+import { Vault as VaultContract } from '../../generated/ControllerListener/Vault'
 
 export function handleWithdraw(event: WithdrawEvent): void {
   let vault = Vault.load(event.address.toHex())
@@ -59,7 +61,7 @@ export function handleWithdraw(event: WithdrawEvent): void {
     vault.save()
     withdrawal.save()
 
-    updateInfomation(event.block, event.transaction.from, event.address, CallType.WITHDRAW)
+    updateInfomation(event.block, event.transaction.from, event.address, shared.constants.CallType.WITHDRAW)
   }
 }
 
@@ -101,35 +103,27 @@ export function handleDeposit(event: Deposit): void {
 
     protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.plus(amountUSD)
 
-    // 65:Vault.sol @  uint256 toMint = amount.mul(underlyingUnit()).div(getPricePerFullShare());
-    // amount of vault token to be transffered aka outToken  _mint(beneficiary, toMint);
-    let toMint = decimal
-      .fromBigInt(event.params.amount)
-      .times(decimal.fromNumber(tokens.helpers.getUnderlyingUnit(inputToken.decimals!)))
-      .div(inputToken.lastPriceUSD!)
-    // FIXME: getPricePerFullShare != inputToken.lastPriceUSD
-    /*
-		148: Vault.sol @
-		function getPricePerFullShare() public view returns (uint256) {
-			return totalSupply() == 0
-				? underlyingUnit()
-				: underlyingUnit().mul(underlyingBalanceWithInvestment()).div(totalSupply());
-			}
-		*/
+    let vaultContract = VaultContract.bind(event.address)
+    let pricePerFullShare = shared.readValue<BigInt>(vaultContract.try_getPricePerFullShare(), BigInt.zero())
+    let underlyingUnit = BigInt.fromI32(tokens.helpers.getUnderlyingUnit(outputToken.decimals))
+    let toMint = event.params.amount.times(underlyingUnit).div(pricePerFullShare)
 
     deposit.vault = vault.id
 
     const tvl = vault.inputTokenBalance.plus(event.params.amount)
     vault.totalValueLockedUSD = amountUSD.times(tvl.div(BigInt.fromI32(inputToken.decimals)).toBigDecimal())
     vault.inputTokenBalance = tvl
+
     // TODO outputTokenSupply && outputTokenPriceUSD
 
-    /*     vault.outputTokenSupply = vault.outputTokenSupply.minus(
+    vault.pricePerShare = pricePerFullShare.toBigDecimal()
+
+    vault.outputTokenSupply = vault.outputTokenSupply!.minus(
       convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals),
     )
 
-    vault.outputTokenPriceUSD = tokenPrice.times(
-      convertTokenDecimals(decimals, token.decimals, outputToken.decimals).toBigDecimal(),
+    /* vault.outputTokenPriceUSD = inputToken.lastPriceUSD!.times(
+      convertTokenDecimals(decimals, inputToken.decimals, outputToken.decimals).toBigDecimal(),
     ) */
 
     accountFrom.save()
@@ -138,7 +132,7 @@ export function handleDeposit(event: Deposit): void {
     vault.save()
     deposit.save()
 
-    updateInfomation(event.block, event.transaction.from, event.address, CallType.DEPOSIT)
+    updateInfomation(event.block, event.transaction.from, event.address, shared.constants.CallType.DEPOSIT)
   }
 }
 
@@ -150,8 +144,8 @@ function convertTokenDecimals(amount: BigInt, inputDecimals: number, outputDecim
 
 function updateInfomation(_block: ethereum.Block, _from: Address, _vaultAddress: Address, _type: string = ''): void {
   updateFinancials(_block.number, _block.timestamp)
-  //updateUsageMetrics(_block, _from, _type)
-  //updateVaultSnapshots(_vaultAddress, _block)
+  updateUsageMetrics(_block, _from, _type)
+  vaults.updateVaultSnapshots(_vaultAddress, _block)
 }
 
 export function handleStrategyAnnounced(event: StrategyAnnounced): void {}
