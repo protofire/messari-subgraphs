@@ -9,7 +9,7 @@ import { accounts, events, tokens, protocol as protocols, shared } from '../modu
 import { Token, Vault } from '../../generated/schema'
 import { decimal } from '@protofire/subgraph-toolkit'
 
-import { Address, ethereum, BigInt } from '@graphprotocol/graph-ts'
+import { Address, ethereum, BigInt, log } from '@graphprotocol/graph-ts'
 import { updateFinancials } from '../modules/financials'
 import { updateUsageMetrics } from '../modules/usage'
 import { vaults } from '../modules/vaults'
@@ -125,7 +125,7 @@ export function handleDeposit(event: Deposit): void {
     vault.inputTokenBalance = tvl
 
     // TODO outputTokenSupply && outputTokenPriceUSD
-
+    // FIXME outputTokenSupply is null
     vault.outputTokenSupply = vault.outputTokenSupply!.minus(
       convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals),
     )
