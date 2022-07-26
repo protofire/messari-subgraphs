@@ -43,17 +43,27 @@ export function handleWithdraw(event: WithdrawEvent): void {
     withdrawal.asset = inputToken.id
     withdrawal.amount = event.params.amount
     withdrawal.vault = vault.id
+
     const amountDecimal = decimal.fromBigInt(event.params.amount, inputToken.decimals)
     const amountUSD = inputToken.lastPriceUSD!.times(amountDecimal)
     withdrawal.amountUSD = amountUSD
 
     protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.minus(amountUSD)
 
+    let pricePerFullShare = getPriceShare(event.address)
+    vault.pricePerShare = pricePerFullShare.toBigDecimal()
+
+    let underlyingUnit = BigInt.fromI64(tokens.helpers.getUnderlyingUnit(outputToken.decimals))
+    let toMint = event.params.amount.times(underlyingUnit).div(pricePerFullShare)
+
     const tvl = vault.inputTokenBalance.minus(event.params.amount)
     vault.totalValueLockedUSD = amountUSD.times(tvl.div(BigInt.fromI32(inputToken.decimals)).toBigDecimal())
     vault.inputTokenBalance = tvl
 
     // TODO outputTokenSupply && outputTokenPriceUSD
+    vault.outputTokenSupply = vault.outputTokenSupply!.plus(
+      convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals),
+    )
 
     accountFrom.save()
     accountTo.save()
@@ -96,6 +106,7 @@ export function handleDeposit(event: Deposit): void {
     deposit.timestamp = event.block.timestamp
     deposit.asset = vault.inputToken
     deposit.amount = event.params.amount
+    deposit.vault = vault.id
 
     const amountDecimal = decimal.fromBigInt(event.params.amount, inputToken.decimals)
     const amountUSD = inputToken.lastPriceUSD!.times(amountDecimal)
@@ -103,20 +114,17 @@ export function handleDeposit(event: Deposit): void {
 
     protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.plus(amountUSD)
 
-    let vaultContract = VaultContract.bind(event.address)
-    let pricePerFullShare = shared.readValue<BigInt>(vaultContract.try_getPricePerFullShare(), BigInt.zero())
-    let underlyingUnit = BigInt.fromI32(tokens.helpers.getUnderlyingUnit(outputToken.decimals))
-    let toMint = event.params.amount.times(underlyingUnit).div(pricePerFullShare)
+    let pricePerFullShare = getPriceShare(event.address)
+    vault.pricePerShare = pricePerFullShare.toBigDecimal()
 
-    deposit.vault = vault.id
+    let underlyingUnit = BigInt.fromI64(tokens.helpers.getUnderlyingUnit(outputToken.decimals))
+    let toMint = event.params.amount.times(underlyingUnit).div(pricePerFullShare)
 
     const tvl = vault.inputTokenBalance.plus(event.params.amount)
     vault.totalValueLockedUSD = amountUSD.times(tvl.div(BigInt.fromI32(inputToken.decimals)).toBigDecimal())
     vault.inputTokenBalance = tvl
 
     // TODO outputTokenSupply && outputTokenPriceUSD
-
-    vault.pricePerShare = pricePerFullShare.toBigDecimal()
 
     vault.outputTokenSupply = vault.outputTokenSupply!.minus(
       convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals),
@@ -134,6 +142,10 @@ export function handleDeposit(event: Deposit): void {
 
     updateInfomation(event.block, event.transaction.from, event.address, shared.constants.CallType.DEPOSIT)
   }
+}
+function getPriceShare(_address: Address): BigInt {
+  let vaultContract = VaultContract.bind(_address)
+  return shared.readValue<BigInt>(vaultContract.try_getPricePerFullShare(), BigInt.zero())
 }
 
 function convertTokenDecimals(amount: BigInt, inputDecimals: number, outputDecimals: number): BigInt {

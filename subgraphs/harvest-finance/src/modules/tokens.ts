@@ -39,7 +39,7 @@ export namespace tokens {
   }
 
   export namespace helpers {
-    export const getUnderlyingUnit = (decimals: i32): f64 => 10 ** decimals
+    export const getUnderlyingUnit = (decimals: i32): i64 => 10 ** decimals
   }
 
   // TODO loadOrCreateRewardToken
