@@ -22,6 +22,9 @@ export namespace tokens {
     }
     return entity as RewardToken
   }
+  export namespace helpers {
+    export const getUnderlyingUnit = (decimals: i32): i32 => 10 ** decimals
+  }
 
   export function loadOrCreateToken(address: Address): Token {
     let id = parseTokenId(address)
@@ -36,10 +39,6 @@ export namespace tokens {
       entity.lastPriceBlockNumber = integer.ZERO
     }
     return entity as Token
-  }
-
-  export namespace helpers {
-    export const getUnderlyingUnit = (decimals: i32): f64 => 10 ** decimals
   }
 
   // TODO loadOrCreateRewardToken
