@@ -1,5 +1,5 @@
-import { BigInt } from '@graphprotocol/graph-ts'
-import { FinancialsDailySnapshot } from '../../generated/schema'
+import { Address, BigInt } from '@graphprotocol/graph-ts'
+import { FinancialsDailySnapshot, YieldAggregator } from '../../generated/schema'
 import { shared } from './shared'
 
 import { protocol as protocols } from '../modules'
