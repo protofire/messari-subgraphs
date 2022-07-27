@@ -47,7 +47,7 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
 		outpuToken.save()
 
 
-		let vault = new Vault(vaultId)
+		let vault = vaults.loadOrCreateVault(call.inputs._vault)
 
 		vault.symbol = vaultResults.symbol
 		vault.name = vaultResults.name
