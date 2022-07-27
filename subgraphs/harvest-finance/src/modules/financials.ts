@@ -2,7 +2,7 @@ import { Address, BigInt } from '@graphprotocol/graph-ts'
 import { FinancialsDailySnapshot, YieldAggregator } from '../../generated/schema'
 import { shared } from './shared'
 
-import { vaults, protocol as protocols } from '../modules'
+import { protocol as protocols } from '../modules'
 
 export function getOrCreateFinancialMetrics(timestamp: BigInt, blockNumber: BigInt): FinancialsDailySnapshot {
   // Number of days since Unix epoch
