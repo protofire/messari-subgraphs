@@ -60,9 +60,13 @@ export function handleWithdraw(event: WithdrawEvent): void {
     vault.totalValueLockedUSD = amountUSD.times(tvl.div(BigInt.fromI32(inputToken.decimals)).toBigDecimal())
     vault.inputTokenBalance = tvl
 
-    // TODO outputTokenSupply && outputTokenPriceUSD
-    vault.outputTokenSupply = vault.outputTokenSupply!.plus(
+    vault.outputTokenSupply = vault.outputTokenSupply!.minus(
       convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals),
+    )
+
+    //FIXME
+    vault.outputTokenPriceUSD = outputToken.lastPriceUSD!.times(
+      convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals).toBigDecimal(),
     )
 
     accountFrom.save()
@@ -125,14 +129,14 @@ export function handleDeposit(event: Deposit): void {
     vault.inputTokenBalance = tvl
 
     // TODO outputTokenSupply && outputTokenPriceUSD
-    // FIXME outputTokenSupply is null
-    vault.outputTokenSupply = vault.outputTokenSupply!.minus(
+    vault.outputTokenSupply = vault.outputTokenSupply!.plus(
       convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals),
     )
 
-    /* vault.outputTokenPriceUSD = inputToken.lastPriceUSD!.times(
-      convertTokenDecimals(decimals, inputToken.decimals, outputToken.decimals).toBigDecimal(),
-    ) */
+    //FIXME
+    vault.outputTokenPriceUSD = outputToken.lastPriceUSD!.times(
+      convertTokenDecimals(toMint, inputToken.decimals, outputToken.decimals).toBigDecimal(),
+    )
 
     accountFrom.save()
     accountTo.save()
