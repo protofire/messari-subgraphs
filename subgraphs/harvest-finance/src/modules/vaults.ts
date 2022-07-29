@@ -74,8 +74,8 @@ export namespace vaults {
   export function updateVaultSnapshots(vaultAddress: Address, block: ethereum.Block): void {
     let vault = loadOrCreateVault(vaultAddress)
 
-    const vaultDailySnapshots = getOrCreateVaultsDailySnapshots(vaultAddress, block)
-    const vaultHourlySnapshots = getOrCreateVaultsHourlySnapshots(vaultAddress, block)
+    const vaultDailySnapshots = loadOrCreateVaultsDailySnapshots(vaultAddress, block)
+    const vaultHourlySnapshots = loadOrCreateVaultsHourlySnapshots(vaultAddress, block)
 
     vaultDailySnapshots.totalValueLockedUSD = vault.totalValueLockedUSD
     vaultHourlySnapshots.totalValueLockedUSD = vault.totalValueLockedUSD
@@ -102,7 +102,7 @@ export namespace vaults {
     vaultHourlySnapshots.save()
   }
 
-  export function getOrCreateVaultsHourlySnapshots(vaultAddress: Address, block: ethereum.Block): VaultHourlySnapshot {
+  export function loadOrCreateVaultsHourlySnapshots(vaultAddress: Address, block: ethereum.Block): VaultHourlySnapshot {
     let id: string = vaultAddress
       .toHexString()
       .concat((block.timestamp.toI64() / shared.constants.SECONDS_PER_DAY).toString())
@@ -126,14 +126,12 @@ export namespace vaults {
 
       vaultSnapshots.blockNumber = block.number
       vaultSnapshots.timestamp = block.timestamp
-
-      vaultSnapshots.save()
     }
 
     return vaultSnapshots
   }
 
-  export function getOrCreateVaultsDailySnapshots(vaultAddress: Address, block: ethereum.Block): VaultDailySnapshot {
+  export function loadOrCreateVaultsDailySnapshots(vaultAddress: Address, block: ethereum.Block): VaultDailySnapshot {
     let id: string = vaultAddress
       .toHexString()
       .concat((block.timestamp.toI64() / shared.constants.SECONDS_PER_DAY).toString())
@@ -155,8 +153,6 @@ export namespace vaults {
 
       vaultSnapshots.blockNumber = block.number
       vaultSnapshots.timestamp = block.timestamp
-
-      vaultSnapshots.save()
     }
 
     return vaultSnapshots

@@ -1,8 +1,7 @@
 import { Address, ethereum } from '@graphprotocol/graph-ts'
-
-import { ActiveAccount, UsageMetricsDailySnapshot, UsageMetricsHourlySnapshot } from '../../generated/schema'
+import { ActiveAccount } from '../../generated/schema'
 import { shared } from './shared'
-import { accounts, protocol as protocols } from '../modules'
+import { accounts, protocol as protocols, timeSeries } from '../modules'
 
 //  Update usage related fields and entities
 export function updateUsageMetrics(block: ethereum.Block, from: Address, callType: string = ''): void {
@@ -10,8 +9,8 @@ export function updateUsageMetrics(block: ethereum.Block, from: Address, callTyp
   const account = accounts.loadOrCreateAccount(from)
 
   const protocol = protocols.loadOrCreateYieldAggregator()
-  const usageMetricsDaily = getOrCreateUsageMetricsDailySnapshot(block)
-  const usageMetricsHourly = getOrCreateUsageMetricsHourlySnapshot(block)
+  const usageMetricsDaily = timeSeries.usageMetrics.loadOrCreateDailySnapshot(block)
+  const usageMetricsHourly = timeSeries.usageMetrics.loadOrCreateHourlySnapshot(block)
 
   let cumulativeUniqueUsers = protocol.cumulativeUniqueUsers
   if (isNewAccount) cumulativeUniqueUsers += 1
@@ -53,55 +52,6 @@ export function updateUsageMetrics(block: ethereum.Block, from: Address, callTyp
   usageMetricsDaily.save()
   usageMetricsHourly.save()
   account.save()
-}
-
-export function getOrCreateUsageMetricsDailySnapshot(block: ethereum.Block): UsageMetricsDailySnapshot {
-  let id: i64 = block.timestamp.toI64() / shared.constants.SECONDS_PER_DAY
-  let usageMetrics = UsageMetricsDailySnapshot.load(id.toString())
-
-  if (!usageMetrics) {
-    usageMetrics = new UsageMetricsDailySnapshot(id.toString())
-    usageMetrics.protocol = shared.constants.PROTOCOL_ID.toHexString()
-
-    usageMetrics.dailyActiveUsers = 0
-    usageMetrics.cumulativeUniqueUsers = 0
-    usageMetrics.dailyTransactionCount = 0
-    usageMetrics.dailyDepositCount = 0
-    usageMetrics.dailyWithdrawCount = 0
-
-    usageMetrics.blockNumber = block.number
-    usageMetrics.timestamp = block.timestamp
-
-    usageMetrics.save()
-  }
-
-  return usageMetrics
-}
-
-export function getOrCreateUsageMetricsHourlySnapshot(block: ethereum.Block): UsageMetricsHourlySnapshot {
-  let metricsID: string = (block.timestamp.toI64() / shared.constants.SECONDS_PER_DAY)
-    .toString()
-    .concat('-')
-    .concat((block.timestamp.toI64() / shared.constants.SECONDS_PER_HOUR).toString())
-  let usageMetrics = UsageMetricsHourlySnapshot.load(metricsID)
-
-  if (!usageMetrics) {
-    usageMetrics = new UsageMetricsHourlySnapshot(metricsID)
-    usageMetrics.protocol = shared.constants.PROTOCOL_ID.toHexString()
-
-    usageMetrics.hourlyActiveUsers = 0
-    usageMetrics.cumulativeUniqueUsers = 0
-    usageMetrics.hourlyTransactionCount = 0
-    usageMetrics.hourlyDepositCount = 0
-    usageMetrics.hourlyWithdrawCount = 0
-
-    usageMetrics.blockNumber = block.number
-    usageMetrics.timestamp = block.timestamp
-
-    usageMetrics.save()
-  }
-
-  return usageMetrics
 }
 
 export function createDailyActiveAccount(accountAddress: Address, timestamp: i32): boolean {
