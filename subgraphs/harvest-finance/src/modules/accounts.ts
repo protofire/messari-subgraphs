@@ -21,7 +21,7 @@ export namespace accounts {
     return `${parseAccountId(id)}-${shared.date.truncateDays(timestamp)}`
   }
 
-  export function isNewAccount(address: Address): Boolean {
+  export function isNewAccount(address: Address): bool {
     let newAccount = false
     let id = parseAccountId(address)
     let entity = Account.load(id)
