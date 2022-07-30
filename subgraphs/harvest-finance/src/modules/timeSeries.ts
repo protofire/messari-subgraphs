@@ -34,7 +34,8 @@ export namespace timeSeries {
 
   export namespace financials {
     export function loadOrCreateDailySnapshot(timestamp: BigInt, blockNumber: BigInt): FinancialsDailySnapshot {
-      let id = Math.floor(timestamp.toI64() / shared.constants.SECONDS_PER_DAY)
+      let timestampNumber: number = timestamp.toI32()
+      let id = Math.floor(timestampNumber / shared.constants.SECONDS_PER_DAY)
 
       let entity = FinancialsDailySnapshot.load(id.toString())
       if (entity == null) {
@@ -59,10 +60,10 @@ export namespace timeSeries {
   }
   export namespace usageMetrics {
     export function loadOrCreateHourlySnapshot(block: ethereum.Block): UsageMetricsHourlySnapshot {
-      let id = Math.floor(block.timestamp.toI64() / shared.constants.SECONDS_PER_DAY)
+      let id = Math.floor(block.timestamp.toI32() / shared.constants.SECONDS_PER_DAY)
         .toString()
         .concat('-')
-        .concat(Math.floor(block.timestamp.toI64() / shared.constants.SECONDS_PER_HOUR).toString())
+        .concat(Math.floor(block.timestamp.toI32() / shared.constants.SECONDS_PER_HOUR).toString())
       let entity = UsageMetricsHourlySnapshot.load(id)
       if (entity == null) {
         entity = new UsageMetricsHourlySnapshot(id)
@@ -79,7 +80,7 @@ export namespace timeSeries {
       return entity as UsageMetricsHourlySnapshot
     }
     export function loadOrCreateDailySnapshot(block: ethereum.Block): UsageMetricsDailySnapshot {
-      let id = Math.floor(block.timestamp.toI64() / shared.constants.SECONDS_PER_DAY)
+      let id = Math.floor(block.timestamp.toI32() / shared.constants.SECONDS_PER_DAY)
       let entity = UsageMetricsDailySnapshot.load(id.toString())
       if (entity == null) {
         entity = new UsageMetricsDailySnapshot(id.toString())
