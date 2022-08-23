@@ -32,6 +32,12 @@ export namespace protocol {
 
 	export namespace mutations {
 
+		export function increaseCumulativeTotalRevenueUSD(entity: YieldAggregator, amount: BigDecimal): YieldAggregator {
+			let e = entity
+			e.cumulativeTotalRevenueUSD = e.cumulativeTotalRevenueUSD.plus(amount)
+			return e as YieldAggregator
+		}
+
 		export function increaseTotalValueLockedUSD(entity: YieldAggregator, amount: BigDecimal): YieldAggregator {
 			let e = entity
 			e.totalValueLockedUSD = e.totalValueLockedUSD.plus(amount)
