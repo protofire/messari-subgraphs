@@ -1,7 +1,16 @@
 import { ethereum } from '@graphprotocol/graph-ts'
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { integer } from '@protofire/subgraph-toolkit'
 
 export namespace shared {
+
+  export namespace helpers {
+    export function safeDiv(a: BigInt, b: BigInt): BigInt {
+      return b.lt(integer.ONE) ? a.div(integer.ONE) : a.div(b)
+
+    }
+  }
+
   // TODO add this to toolkit
   export function readValue<T>(callResult: ethereum.CallResult<T>, fallBackValue: T): T {
     return callResult.reverted ? fallBackValue : callResult.value

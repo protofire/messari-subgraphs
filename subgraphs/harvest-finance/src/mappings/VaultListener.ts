@@ -49,15 +49,14 @@ export function handleWithdraw(event: WithdrawEvent): void {
     withdrawal.amountUSD = amountUSD
 
     protocol.totalValueLockedUSD = protocol.totalValueLockedUSD.minus(amountUSD)
-
     let pricePerFullShare = getPriceShare(event.address)
     vault.pricePerShare = pricePerFullShare.toBigDecimal()
 
     let underlyingUnit = BigInt.fromI64(tokens.helpers.getUnderlyingUnit(outputToken.decimals))
-    let toMint = event.params.amount.times(underlyingUnit).div(pricePerFullShare)
+    let toMint = shared.helpers.safeDiv(event.params.amount.times(underlyingUnit), pricePerFullShare)
 
     const tvl = vault.inputTokenBalance.minus(event.params.amount)
-    vault.totalValueLockedUSD = amountUSD.times(tvl.div(BigInt.fromI32(inputToken.decimals)).toBigDecimal())
+    vault.totalValueLockedUSD = amountUSD.times(shared.helpers.safeDiv(tvl, BigInt.fromI32(inputToken.decimals)).toBigDecimal())
     vault.inputTokenBalance = tvl
 
     // TODO outputTokenSupply && outputTokenPriceUSD
