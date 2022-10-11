@@ -39,6 +39,8 @@ export namespace metrics {
       vaultSnapshots.dailyProtocolSideRevenueUSD = constants.BIG_DECIMAL_ZERO
       vaultSnapshots.cumulativeProtocolSideRevenueUSD =
         constants.BIG_DECIMAL_ZERO
+      vaultSnapshots.rewardTokenEmissionsAmount = [constants.BIG_INT_ZERO]
+      vaultSnapshots.rewardTokenEmissionsUSD = [constants.BIG_DECIMAL_ZERO]
 
       vaultSnapshots.dailyTotalRevenueUSD = constants.BIG_DECIMAL_ZERO
       vaultSnapshots.cumulativeTotalRevenueUSD = constants.BIG_DECIMAL_ZERO
@@ -71,6 +73,9 @@ export namespace metrics {
       vaultSnapshots.outputTokenSupply = constants.BIG_INT_ZERO
       vaultSnapshots.outputTokenPriceUSD = constants.BIG_DECIMAL_ZERO
       vaultSnapshots.pricePerShare = constants.BIG_DECIMAL_ZERO
+      vaultSnapshots.stakedOutputTokenAmount = constants.BIG_INT_ZERO
+      vaultSnapshots.rewardTokenEmissionsAmount = [constants.BIG_INT_ZERO]
+      vaultSnapshots.rewardTokenEmissionsUSD = [constants.BIG_DECIMAL_ZERO]
 
       vaultSnapshots.hourlySupplySideRevenueUSD = constants.BIG_DECIMAL_ZERO
       vaultSnapshots.cumulativeSupplySideRevenueUSD = constants.BIG_DECIMAL_ZERO
@@ -315,6 +320,9 @@ export namespace metrics {
 
     vaultDailySnapshots.pricePerShare = vault.pricePerShare
     vaultHourlySnapshots.pricePerShare = vault.pricePerShare
+
+    vaultDailySnapshots.stakedOutputTokenAmount = vault.stakedOutputTokenAmount
+    vaultHourlySnapshots.stakedOutputTokenAmount = vault.stakedOutputTokenAmount
 
     vaultDailySnapshots.rewardTokenEmissionsAmount =
       vault.rewardTokenEmissionsAmount
