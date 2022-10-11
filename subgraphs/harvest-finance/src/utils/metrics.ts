@@ -240,6 +240,30 @@ export namespace metrics {
     usageMetricsHourly.save()
   }
 
+  export function updateMetricsAfterDeposit(block: ethereum.Block): void {
+    // Update hourly and daily deposit transaction count
+    const metricsDailySnapshot = getOrCreateUsageMetricsDailySnapshot(block)
+    const metricsHourlySnapshot = getOrCreateUsageMetricsHourlySnapshot(block)
+
+    metricsDailySnapshot.dailyDepositCount += 1
+    metricsHourlySnapshot.hourlyDepositCount += 1
+
+    metricsDailySnapshot.save()
+    metricsHourlySnapshot.save()
+  }
+
+  export function updateMetricsAfterWithdraw(block: ethereum.Block): void {
+    // Update hourly and daily deposit transaction count
+    const metricsDailySnapshot = getOrCreateUsageMetricsDailySnapshot(block)
+    const metricsHourlySnapshot = getOrCreateUsageMetricsHourlySnapshot(block)
+
+    metricsDailySnapshot.dailyWithdrawCount += 1
+    metricsHourlySnapshot.hourlyWithdrawCount += 1
+
+    metricsDailySnapshot.save()
+    metricsHourlySnapshot.save()
+  }
+
   export function updateFinancials(block: ethereum.Block): void {
     const protocol = YieldAggregator.load(constants.PROTOCOL_ID.toHexString())
 
