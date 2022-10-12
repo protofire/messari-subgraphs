@@ -1,7 +1,7 @@
 import { Address, ethereum } from '@graphprotocol/graph-ts'
 import { constants } from './constants'
 import { tokens } from './tokens'
-import { RewardToken, Token } from '../../generated/schema'
+import { RewardToken } from '../../generated/schema'
 
 export namespace rewardTokens {
   export function getOrCreateRewardToken(address: Address): RewardToken {
