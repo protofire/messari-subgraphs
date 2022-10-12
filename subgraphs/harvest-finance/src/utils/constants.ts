@@ -37,4 +37,7 @@ export namespace constants {
   export const WETH_ADDRESS = Address.fromString(
     '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
   )
+
+  export const REWARD_TOKEN_TYPE_DEPOSIT = 'DEPOSIT'
+  export const REWARD_TOKEN_TYPE_BORROW = 'BORROW'
 }
