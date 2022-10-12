@@ -40,4 +40,6 @@ export namespace constants {
 
   export const REWARD_TOKEN_TYPE_DEPOSIT = 'DEPOSIT'
   export const REWARD_TOKEN_TYPE_BORROW = 'BORROW'
+
+  export const FEE_TYPE_PERFORMANCE = 'PERFORMANCE_FEE'
 }

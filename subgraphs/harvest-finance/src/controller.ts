@@ -1,6 +1,6 @@
 import { AddVaultAndStrategyCall } from '../generated/Controller/ControllerContract'
 import { VaultFee } from '../generated/schema'
-import { BigDecimal, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { tokens } from './utils/tokens'
 import { vaults } from './utils/vaults'
 import { Vault as VaultTemplate } from '../generated/templates'
@@ -8,6 +8,7 @@ import { Vault } from '../generated/schema'
 import { prices } from './utils/prices'
 import { protocols } from './utils/protocols'
 import { constants } from './utils/constants'
+import { fees } from './utils/fees'
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   let vaultAddress = call.inputs._vault
@@ -65,12 +66,23 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   vault.createdTimestamp = call.block.timestamp
   vault.createdBlockNumber = call.block.number
 
+  /*
   // TODO: Remove this placeholder after logic implementation
   const fee = new VaultFee('DEPOSIT_FEE-'.concat(vaultAddress.toHexString()))
   fee.feePercentage = BigDecimal.fromString('1.5')
   fee.feeType = 'DEPOSIT_FEE'
   fee.save()
-  vault.fees = [fee.id]
+  vault.fees = [fee.id]*/
+
+  //TODO: Parameterize this for multiple networks
+  //ETH Mainnet performance fee is 30%
+  let vaultFee = fees.getOrCreateVaultFee(
+    vaultAddress.toHexString(),
+    constants.FEE_TYPE_PERFORMANCE,
+    BigInt.fromI32(30)
+  )
+
+  vault.fees = [vaultFee.id]
 
   const protocol = protocols.findOrInitialize(constants.CONTROLLER_ADDRESS)
 
