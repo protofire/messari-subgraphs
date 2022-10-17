@@ -1,4 +1,8 @@
-import { AddVaultAndStrategyCall } from '../generated/Controller/ControllerContract'
+import {
+  AddVaultAndStrategyCall,
+  SharePriceChangeLog,
+} from '../generated/Controller/ControllerContract'
+import { VaultContract } from '../generated/Controller/VaultContract'
 import { VaultFee } from '../generated/schema'
 import { BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { tokens } from './utils/tokens'
@@ -93,4 +97,41 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   vault.save()
 
   VaultTemplate.create(vaultAddress)
+}
+
+export function handleDoHardWork(event: SharePriceChangeLog) {
+  const vaultAddress = event.params.vault
+  const vault = Vault.load(vaultAddress.toHexString())
+
+  if (!vault) return
+
+  //TODO: Review this logic
+  vault.pricePerShare = event.params.newSharePrice.toBigDecimal()
+
+  const vaultContract = VaultContract.bind(vaultAddress)
+
+  const oldInputTokenBalance = vault.inputTokenBalance
+
+  const inputTokenBalanceCall =
+    vaultContract.try_underlyingBalanceWithInvestment()
+
+  if (inputTokenBalanceCall.reverted) {
+    log.debug('VaultCall Reverted block: {}, tx: {}', [
+      event.block.number.toString(),
+      event.transaction.hash.toHexString(),
+    ])
+  }
+
+  const newInputTokenBalance = inputTokenBalanceCall.value
+  vault.inputTokenBalance = newInputTokenBalance
+
+  //TODO: Review this logic
+  const profit = newInputTokenBalance.minus(oldInputTokenBalance)
+
+  //If theres more input token than before, and the same amount of output token
+  //Output token price should be updated
+
+  //TVL, revenue, metrics, etc should be updated
+
+  vault.save()
 }
