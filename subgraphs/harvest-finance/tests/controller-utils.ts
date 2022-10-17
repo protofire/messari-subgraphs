@@ -98,6 +98,26 @@ export function mockUniswapRouter(
     .returns([ethereum.Value.fromUnsignedBigIntArray([amountIn, amountOut])])
 }
 
+export function mockUniswapRouter_factory(
+  contractAddress: Address,
+  address: Address = Address.zero(),
+  revert: bool = false
+): void {
+  if (revert) {
+    createMockedFunction(
+      contractAddress,
+      'factory',
+      'factory():(address)'
+    ).reverts()
+    return
+  }
+  createMockedFunction(
+    contractAddress,
+    'factory',
+    'factory():(address)'
+  ).returns([ethereum.Value.fromAddress(address)])
+}
+
 export function mockYearnLens(
   contractAddress: Address,
   tokenAddress: Address,
