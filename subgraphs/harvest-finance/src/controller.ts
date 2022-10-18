@@ -70,17 +70,9 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   vault.createdTimestamp = call.block.timestamp
   vault.createdBlockNumber = call.block.number
 
-  /*
-  // TODO: Remove this placeholder after logic implementation
-  const fee = new VaultFee('DEPOSIT_FEE-'.concat(vaultAddress.toHexString()))
-  fee.feePercentage = BigDecimal.fromString('1.5')
-  fee.feeType = 'DEPOSIT_FEE'
-  fee.save()
-  vault.fees = [fee.id]*/
-
   //TODO: Parameterize this for multiple networks
   //ETH Mainnet performance fee is 30%
-  let vaultFee = fees.getOrCreateVaultFee(
+  const vaultFee = fees.getOrCreateVaultFee(
     vaultAddress.toHexString(),
     constants.FEE_TYPE_PERFORMANCE,
     BigInt.fromI32(30)
@@ -99,7 +91,7 @@ export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   VaultTemplate.create(vaultAddress)
 }
 
-export function handleDoHardWork(event: SharePriceChangeLog) {
+export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   const vaultAddress = event.params.vault
   const vault = Vault.load(vaultAddress.toHexString())
 
