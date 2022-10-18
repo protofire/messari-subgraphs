@@ -8,6 +8,7 @@ import {
 import { createMockedFunction, newMockCall, assert } from 'matchstick-as'
 import { AddVaultAndStrategyCall } from '../generated/Controller/ControllerContract'
 import { constants } from '../src/utils/constants'
+import { toStringArray } from './utils/helpers'
 
 export function mockCall(
   vault: Address,
@@ -205,7 +206,7 @@ export function assertVault(
     'Vault',
     address.toHexString(),
     'fees',
-    '[' + feesArray.toString() + ']'
+    toStringArray(feesArray)
   )
 }
 
