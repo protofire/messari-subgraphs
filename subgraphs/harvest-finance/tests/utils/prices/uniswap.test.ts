@@ -1,5 +1,5 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
-import { assert, describe, log, test } from 'matchstick-as'
+import { assert, describe, test } from 'matchstick-as'
 import { constants } from '../../../src/utils/constants'
 import { uniswap } from '../../../src/utils/pricies/uniswap'
 import {
