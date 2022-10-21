@@ -1,14 +1,7 @@
-import {
-  Address,
-  ethereum,
-  BigInt,
-  BigDecimal,
-  Bytes,
-} from '@graphprotocol/graph-ts'
+import { Address, ethereum, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import { createMockedFunction, newMockCall, assert } from 'matchstick-as'
 import { AddVaultAndStrategyCall } from '../generated/Controller/ControllerContract'
-import { constants } from '../src/utils/constants'
-import { toStringArray } from './utils/helpers'
+import { helpers } from './utils/helpers'
 
 export function mockCall(
   vault: Address,
@@ -226,7 +219,7 @@ export function assertVault(
     'Vault',
     address.toHexString(),
     'fees',
-    toStringArray(feesArray)
+    helpers.toStringArray(feesArray)
   )
 }
 
