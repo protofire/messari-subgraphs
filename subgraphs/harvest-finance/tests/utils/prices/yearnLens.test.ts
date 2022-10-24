@@ -1,7 +1,7 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 import { assert, describe, test } from 'matchstick-as'
 import { constants } from '../../../src/utils/constants'
-import { yearnLens } from '../../../src/utils/pricies/yearnLens'
+import { yearnLens } from '../../../src/utils/prices/yearnLens'
 import { mockYearnLens } from '../../controller-utils'
 
 const tokenAddress = Address.fromString(

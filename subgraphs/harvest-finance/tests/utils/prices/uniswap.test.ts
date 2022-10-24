@@ -1,7 +1,7 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 import { assert, describe, test } from 'matchstick-as'
 import { constants } from '../../../src/utils/constants'
-import { uniswap } from '../../../src/utils/pricies/uniswap'
+import { uniswap } from '../../../src/utils/prices/uniswap'
 import {
   mockERC20,
   mockUniswapRouter,

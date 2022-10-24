@@ -1,7 +1,7 @@
 import { Address, BigDecimal } from '@graphprotocol/graph-ts'
-import { chainlink } from './pricies/chainlink'
-import { yearnLens } from './pricies/yearnLens'
-import { uniswap } from './pricies/uniswap'
+import { chainlink } from './prices/chainlink'
+import { yearnLens } from './prices/yearnLens'
+import { uniswap } from './prices/uniswap'
 
 export namespace prices {
   export function getPricePerToken(tokenAddress: Address): BigDecimal {

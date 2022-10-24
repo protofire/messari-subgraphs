@@ -1,7 +1,7 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 import { assert, describe, test } from 'matchstick-as'
 import { constants } from '../../../src/utils/constants'
-import { chainlink } from '../../../src/utils/pricies/chainlink'
+import { chainlink } from '../../../src/utils/prices/chainlink'
 import { mockChainLink } from '../../controller-utils'
 
 const tokenAddress = Address.fromString(
