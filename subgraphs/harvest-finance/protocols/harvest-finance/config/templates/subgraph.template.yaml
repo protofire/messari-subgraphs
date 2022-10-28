@@ -68,6 +68,34 @@ dataSources:
           handler: handleNotifyPoolsIncludingProfitShare
       file: ./src/notifyHelper.ts
 
+  - kind: ethereum
+    name: MegaFactory
+    network: {{ network }}
+    source:
+      address: '0xe1ec9151eb8d9a3451b8f623ce8b62632a6d4f4d'
+      startBlock: 13658254
+      abi: MegaFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+        - RewardToken
+        - Token
+      abis:
+        - name: VaultContract
+          file: ./abis/Vault.json
+        - name: ERC20Contract
+          file: ./abis/ERC20.json
+        - name: MegaFactory
+          file: ./abis/MegaFactory.json
+        - name: PotPool
+          file: ./abis/PotPool.json
+      eventHandlers:
+        - event: DeploymentCompleted(string)
+          handler: handleDeploymentCompleted
+      file: ./src/megaFactory.ts
 templates:
   - kind: ethereum/contract
     name: Vault
