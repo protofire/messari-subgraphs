@@ -521,7 +521,12 @@ describe('Vault', () => {
         outputToken.decimals = 6
         outputToken.save()
 
-        const vault = createVault()
+        const vault = createVaultAndProtocol(
+          vaultAddress,
+          inputTokenAddress,
+          outputTokenAddress,
+          protocolAddress
+        )
         vault.outputTokenSupply = outputTokenSupply
         vault.totalValueLockedUSD = totalValueLockedUSD
         vault.save()
@@ -533,7 +538,11 @@ describe('Vault', () => {
 
         const amount = BigInt.fromString('200000000') // 200
 
-        const event = helpers.createTransferEvent(from, to, amount)
+        const event = helpers.mocking.vault.createTransferEvent(
+          from,
+          to,
+          amount
+        )
 
         event.address = vaultAddress
 
