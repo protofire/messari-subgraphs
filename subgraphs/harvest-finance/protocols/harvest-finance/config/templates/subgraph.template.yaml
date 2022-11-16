@@ -153,3 +153,24 @@ templates:
         - event: Withdrawn(indexed address,uint256)
           handler: handleWithdrawn
       file: ./src/potPool.ts
+  
+  - kind: ethereum/contract
+    name: NoMintRewardPool
+    network: {{ network }}
+    source:
+      abi: NoMintRewardPool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+      abis:
+        - name: NoMintRewardPool
+          file: ./abis/NoMintRewardPool.json
+      eventHandlers:
+        - event: Staked(indexed address,uint256)
+          handler: handleStaked
+        - event: Withdrawn(indexed address,uint256)
+          handler: handleWithdrawn
+      file: ./src/noMintRewardPool.ts

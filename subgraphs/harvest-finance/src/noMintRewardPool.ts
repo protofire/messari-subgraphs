@@ -1,14 +1,14 @@
 import {
   Staked as StakedEvent,
   Withdrawn as WithdrawnEvent,
-} from '../generated/templates/PotPool/PotPool'
-import { getVaultFromPotPool } from './utils/potPools'
+} from '../generated/templates/NoMintRewardPool/NoMintRewardPool'
+import { getVaultFromNoMintRewardPool } from './utils/noMintRewardPools'
 
 export function handleStaked(event: StakedEvent): void {
   const amount = event.params.amount
   const poolAddress = event.address
 
-  const vault = getVaultFromPotPool(poolAddress)
+  const vault = getVaultFromNoMintRewardPool(poolAddress)
 
   if (!vault) return
 
@@ -21,7 +21,7 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
   const amount = event.params.amount
   const poolAddress = event.address
 
-  const vault = getVaultFromPotPool(poolAddress)
+  const vault = getVaultFromNoMintRewardPool(poolAddress)
 
   if (!vault) return
 
