@@ -145,8 +145,10 @@ function handleMint(event: TransferEvent): void {
 
   vault.outputTokenSupply = vault.outputTokenSupply!.plus(amount)
 
+  const outputToken = Token.load(vault.outputToken!)
+
   vault.outputTokenPriceUSD = vault.totalValueLockedUSD.div(
-    decimals.fromBigInt(vault.outputTokenSupply!, 6)
+    decimals.fromBigInt(vault.outputTokenSupply!, outputToken!.decimals as u8)
   )
 
   vault.save()
@@ -164,12 +166,16 @@ function handleBurn(event: TransferEvent): void {
 
   if (!vault) return
 
-  const outputTokenSupply = vault.outputTokenSupply! || BigInt.fromI32(0)
+  if (!vault.outputTokenSupply) {
+    vault.outputTokenSupply = BigInt.fromI32(0)
+  }
 
-  vault.outputTokenSupply = outputTokenSupply.minus(amount)
+  vault.outputTokenSupply = vault.outputTokenSupply!.minus(amount)
+
+  const outputToken = Token.load(vault.outputToken!)
 
   vault.outputTokenPriceUSD = vault.totalValueLockedUSD.div(
-    decimals.fromBigInt(vault.outputTokenSupply!, 6)
+    decimals.fromBigInt(vault.outputTokenSupply!, outputToken!.decimals as u8)
   )
 
   vault.save()

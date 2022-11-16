@@ -28,11 +28,11 @@ const inputTokenAddress = Address.fromString(
 
 const protocolAddressString = '0x222412af183bceadefd72e4cb1b71f1889953b1c'
 
-export function createVault(): Vault {
-  const outputTokenAddress = Address.fromString(
-    '0x0000000000000000000000000000000000000003'
-  )
+const outputTokenAddress = Address.fromString(
+  '0x0000000000000000000000000000000000000003'
+)
 
+export function createVault(): Vault {
   const vault = vaults.initialize(vaultAddress.toHexString())
   const protocol = protocols.initialize(protocolAddressString)
   protocol.totalPoolCount = protocol.totalPoolCount + 1
@@ -139,7 +139,7 @@ describe('Vault', () => {
       })
     })
 
-    test('updates Token.lastPriceUSD and Vault.totalValueLockedUSD ', () => {
+    test('updates Token.lastPriceUSD and Vault.totalValueLockedUSD', () => {
       const vault = createVault()
 
       const beneficiaryAddress = Address.fromString(
@@ -422,6 +422,10 @@ describe('Vault', () => {
   describe('handleTransfer', () => {
     describe('when transfer comes from zero address (minting)', () => {
       test('increments outputTokenSupply and updates outputTokenPriceUSD', () => {
+        const outputToken = tokens.initialize(outputTokenAddress.toHexString())
+        outputToken.decimals = 6
+        outputToken.save()
+
         const vault = createVault()
         vault.totalValueLockedUSD = BigDecimal.fromString('1000')
         vault.save()
@@ -446,7 +450,7 @@ describe('Vault', () => {
         helpers.asserting.vaults.outputTokenSupply(vault.id, amount)
 
         const newOutputTokenPriceUSD = vault.totalValueLockedUSD.div(
-          decimals.fromBigInt(amount, 6)
+          decimals.fromBigInt(amount, outputToken.decimals as u8)
         )
 
         helpers.asserting.vaults.outputTokenPriceUSD(
@@ -460,6 +464,10 @@ describe('Vault', () => {
       test('decrements outputTokenSupply and updates outputTokenPriceUSD', () => {
         const outputTokenSupply = BigInt.fromString('300000000') // 300
         const totalValueLockedUSD = BigDecimal.fromString('1000')
+
+        const outputToken = tokens.initialize(outputTokenAddress.toHexString())
+        outputToken.decimals = 6
+        outputToken.save()
 
         const vault = createVault()
         vault.outputTokenSupply = outputTokenSupply
@@ -487,7 +495,7 @@ describe('Vault', () => {
         )
 
         const newOutputTokenPriceUSD = vault.totalValueLockedUSD.div(
-          decimals.fromBigInt(newOutputTokenSupply, 6)
+          decimals.fromBigInt(newOutputTokenSupply, outputToken.decimals as u8)
         )
 
         helpers.asserting.vaults.outputTokenPriceUSD(
