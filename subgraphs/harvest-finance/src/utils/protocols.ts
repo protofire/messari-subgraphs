@@ -1,8 +1,22 @@
-import { Address } from '@graphprotocol/graph-ts'
-import { YieldAggregator } from '../../generated/schema'
+import { Address, BigDecimal } from '@graphprotocol/graph-ts'
+import { Vault, YieldAggregator } from '../../generated/schema'
 import { constants } from './constants'
 
 export namespace protocols {
+  export function calculateTotalValueLockedUSD(id: string): BigDecimal | null {
+    const protocol = YieldAggregator.load(id)
+
+    if (!protocol) return null
+
+    return protocol.vaults
+      .map<BigDecimal>(function (vaultId: string) {
+        return Vault.load(vaultId)!.totalValueLockedUSD
+      })
+      .reduce(function (m: BigDecimal, v: BigDecimal) {
+        return m.plus(v)
+      }, constants.BIG_DECIMAL_ZERO)
+  }
+
   export function findOrInitialize(address: Address): YieldAggregator {
     const id = address.toHexString()
 
