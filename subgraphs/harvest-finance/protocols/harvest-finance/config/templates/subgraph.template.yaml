@@ -95,7 +95,7 @@ dataSources:
           file: ./abis/MegaFactory.json
         - name: PotPool
           file: ./abis/PotPool.json
-         - name: ChainLinkContract
+        - name: ChainLinkContract
           file: ./abis/ChainLink.json
         - name: YearnLensContract
           file: ./abis/YearnLens.json
