@@ -95,6 +95,14 @@ dataSources:
           file: ./abis/MegaFactory.json
         - name: PotPool
           file: ./abis/PotPool.json
+         - name: ChainLinkContract
+          file: ./abis/ChainLink.json
+        - name: YearnLensContract
+          file: ./abis/YearnLens.json
+        - name: UniswapRouterContract
+          file: ./abis/UniswapRouter.json
+        - name: UniswapPairContract
+          file: ./abis/UniswapV2Pair.json
       eventHandlers:
         - event: DeploymentCompleted(string)
           handler: handleDeploymentCompleted
