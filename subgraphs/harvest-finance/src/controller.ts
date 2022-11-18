@@ -61,16 +61,5 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 
   vault.save()
 
-  const protocol = YieldAggregator.load(vault.protocol)
-
-  if (protocol) {
-    const protocolTotalValueLockedUSD = protocols.calculateTotalValueLockedUSD(
-      vault.protocol
-    )
-
-    if (protocolTotalValueLockedUSD) {
-      protocol.totalValueLockedUSD = protocolTotalValueLockedUSD
-      protocol.save()
-    }
-  }
+  protocols.updateTotalValueLockedUSD(vault.protocol)
 }

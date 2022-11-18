@@ -17,6 +17,19 @@ export namespace protocols {
       }, constants.BIG_DECIMAL_ZERO)
   }
 
+  export function updateTotalValueLockedUSD(id: string): void {
+    const protocol = YieldAggregator.load(id)
+
+    if (!protocol) return
+
+    const totalValueLockedUSD = calculateTotalValueLockedUSD(id)
+
+    if (!totalValueLockedUSD) return
+
+    protocol.totalValueLockedUSD = totalValueLockedUSD
+    protocol.save()
+  }
+
   export function findOrInitialize(address: Address): YieldAggregator {
     const id = address.toHexString()
 
