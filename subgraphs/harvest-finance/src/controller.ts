@@ -8,13 +8,19 @@ import { Token, Vault } from '../generated/schema'
 import { prices } from './utils/prices'
 import { decimals } from './utils'
 import { protocols } from './utils/protocols'
+import { strategies } from './utils/strategies'
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   let vaultAddress = call.inputs._vault
+  let strategyAddress = call.inputs._strategy
   let timestamp = call.block.timestamp
   let blockNumber = call.block.number
 
   vaults.createVault(vaultAddress, timestamp, blockNumber)
+
+  let strategy = strategies.getOrCreateStrategy(strategyAddress)
+  strategy.vault = vaultAddress.toHexString()
+  strategy.save()
 }
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
