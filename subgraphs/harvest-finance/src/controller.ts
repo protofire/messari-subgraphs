@@ -4,7 +4,7 @@ import {
 } from '../generated/Controller/ControllerContract'
 import { Address } from '@graphprotocol/graph-ts'
 import { vaults } from './utils/vaults'
-import { Token, Vault, YieldAggregator } from '../generated/schema'
+import { Token, Vault } from '../generated/schema'
 import { prices } from './utils/prices'
 import { decimals } from './utils'
 import { protocols } from './utils/protocols'

@@ -1,4 +1,4 @@
-import { Address, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal } from '@graphprotocol/graph-ts'
 import { Vault, YieldAggregator } from '../../generated/schema'
 import { constants } from './constants'
 
