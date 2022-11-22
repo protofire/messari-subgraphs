@@ -1,4 +1,4 @@
-import { Address, BigDecimal } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, log } from '@graphprotocol/graph-ts'
 import { Vault, YieldAggregator } from '../../generated/schema'
 import { constants } from './constants'
 
@@ -8,8 +8,10 @@ export namespace protocols {
 
     if (!protocol) return null
 
-    return protocol.vaults
-      .map<BigDecimal>(function (vaultId: string) {
+    if (!protocol._vaults) return constants.BIG_DECIMAL_ZERO
+
+    return protocol
+      ._vaults!.map<BigDecimal>(function (vaultId: string) {
         return Vault.load(vaultId)!.totalValueLockedUSD
       })
       .reduce(function (m: BigDecimal, v: BigDecimal) {

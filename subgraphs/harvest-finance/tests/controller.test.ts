@@ -96,6 +96,15 @@ describe('Controller', () => {
         ],
       })
 
+      // assert protocol._vaults (workaround)
+
+      assert.fieldEquals(
+        'YieldAggregator',
+        constants.CONTROLLER_ADDRESS.toHexString(),
+        '_vaults',
+        `[${vaultAddress.toHexString()}]`
+      )
+
       // Input Token Assertions
 
       helpers.asserting.tokens.token(inputTokenAddress.toHexString(), {
@@ -146,7 +155,6 @@ describe('Controller', () => {
       inputToken.save()
 
       const protocol = protocols.initialize(protocolId)
-      protocol.save()
 
       const vault1 = vaults.initialize(vaultAddress1.toHexString())
       vault1.protocol = protocolId
@@ -157,6 +165,10 @@ describe('Controller', () => {
       vault2.protocol = protocolId
       vault2.totalValueLockedUSD = BigDecimal.fromString('999.55')
       vault2.save()
+
+      protocol._vaults = [vault1.id, vault2.id]
+
+      protocol.save()
 
       helpers.mocking.chainLink.chainLink(
         constants.CHAIN_LINK_CONTRACT_ADDRESS,

@@ -17,6 +17,7 @@ export function createVaultAndProtocol(
 ): Vault {
   const protocol = protocols.initialize(protocolAddress.toHexString())
   protocol.totalPoolCount = protocol.totalPoolCount + 1
+  protocol._vaults = [vaultAddress.toHexString()]
   protocol.save()
 
   const vault = vaults.initialize(vaultAddress.toHexString())
