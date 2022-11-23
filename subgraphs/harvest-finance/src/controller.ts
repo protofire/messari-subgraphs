@@ -45,8 +45,6 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
     inputToken.decimals as u8
   )
 
-  const oldInputTokenBalance = vault.inputTokenBalance
-
   const newInputTokenBalance = vaults.extractInputTokenBalance(vaultAddress)
 
   if (!newInputTokenBalance) return
@@ -57,13 +55,8 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 
   vault.inputTokenBalance = newInputTokenBalance
 
-  //TODO: Review this logic
-  const profit = newInputTokenBalance.minus(oldInputTokenBalance)
-
   //If theres more input token than before, and the same amount of output token
   //Output token price should be updated
-
-  //TVL, revenue, metrics, etc should be updated
 
   vault.save()
 

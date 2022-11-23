@@ -1,4 +1,4 @@
-import { Address, ethereum } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, ethereum } from '@graphprotocol/graph-ts'
 import {
   Account,
   ActiveAccount,
@@ -269,6 +269,45 @@ export namespace metrics {
 
     metricsDailySnapshot.save()
     metricsHourlySnapshot.save()
+  }
+
+  export function updateVaultSnapshotsAfterRevenue(
+    vaultAddress: string,
+    profitAmountUSD: BigDecimal,
+    feeAmountUSD: BigDecimal,
+    block: ethereum.Block
+  ): void {
+    // Update hourly and daily deposit transaction count
+    const vaultDailySnapshot = getOrCreateVaultsDailySnapshots(
+      vaultAddress,
+      block
+    )
+    const vaultHourlySnapshot = getOrCreateVaultsHourlySnapshots(
+      vaultAddress,
+      block
+    )
+
+    vaultDailySnapshot.dailySupplySideRevenueUSD =
+      vaultDailySnapshot.dailySupplySideRevenueUSD.plus(
+        profitAmountUSD.minus(feeAmountUSD)
+      )
+    vaultHourlySnapshot.hourlySupplySideRevenueUSD =
+      vaultHourlySnapshot.hourlySupplySideRevenueUSD.plus(
+        profitAmountUSD.minus(feeAmountUSD)
+      )
+
+    vaultDailySnapshot.dailyProtocolSideRevenueUSD =
+      vaultDailySnapshot.dailyProtocolSideRevenueUSD.plus(feeAmountUSD)
+    vaultHourlySnapshot.hourlyProtocolSideRevenueUSD =
+      vaultHourlySnapshot.hourlyProtocolSideRevenueUSD.plus(feeAmountUSD)
+
+    vaultDailySnapshot.dailyTotalRevenueUSD =
+      vaultDailySnapshot.dailyTotalRevenueUSD.plus(profitAmountUSD)
+    vaultHourlySnapshot.hourlyTotalRevenueUSD =
+      vaultHourlySnapshot.hourlyTotalRevenueUSD.plus(profitAmountUSD)
+
+    vaultDailySnapshot.save()
+    vaultHourlySnapshot.save()
   }
 
   export function updateFinancials(block: ethereum.Block): void {
