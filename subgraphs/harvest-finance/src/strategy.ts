@@ -13,10 +13,19 @@ export function handleProfitLogInReward(event: ProfitLogInRewardEvent): void {
 
   const vaultAddress = strategy.vault
 
+  if (!vaultAddress) {
+    log.debug('Vault address not found for strategy {}', [
+      event.address.toHexString(),
+    ])
+    return
+  }
+
   const vault = Vault.load(vaultAddress!)
 
-  if (!vaultAddress || !vault) {
-    log.debug('Vault not found for strategy: {}', [event.address.toHexString()])
+  if (!vault) {
+    log.debug('Vault entity not found for strategy: {}', [
+      event.address.toHexString(),
+    ])
     return
   }
 
@@ -35,7 +44,7 @@ export function handleProfitLogInReward(event: ProfitLogInRewardEvent): void {
     tokenDecimals as u8
   )
   const profitAmountUSD = prices.getPrice(
-    Address.fromHexString(tokenAddress),
+    Address.fromString(tokenAddress),
     profitAmount
   )
 
@@ -44,16 +53,22 @@ export function handleProfitLogInReward(event: ProfitLogInRewardEvent): void {
     tokenDecimals as u8
   )
   const feeAmountUSD = prices.getPrice(
-    Address.fromHexString(tokenAddress),
+    Address.fromString(tokenAddress),
     feeAmount
   )
 
-  vaults.updateRevenue(vaultAddress, profitAmountUSD, feeAmountUSD)
+  vaults.updateRevenue(vaultAddress!, profitAmountUSD, feeAmountUSD)
 
   protocols.updateRevenue(vault.protocol, profitAmountUSD, feeAmountUSD)
 
   metrics.updateVaultSnapshotsAfterRevenue(
-    vaultAddress,
+    vaultAddress!,
+    profitAmountUSD,
+    feeAmountUSD,
+    event.block
+  )
+
+  metrics.updateFinancialsAfterRevenue(
     profitAmountUSD,
     feeAmountUSD,
     event.block

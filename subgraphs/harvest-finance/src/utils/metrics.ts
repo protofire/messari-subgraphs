@@ -125,9 +125,12 @@ export namespace metrics {
       financialMetrics.protocol = constants.PROTOCOL_ID.toHexString()
 
       financialMetrics.totalValueLockedUSD = constants.BIG_DECIMAL_ZERO
+      financialMetrics.protocolControlledValueUSD = constants.BIG_DECIMAL_ZERO
+
       financialMetrics.dailySupplySideRevenueUSD = constants.BIG_DECIMAL_ZERO
       financialMetrics.cumulativeSupplySideRevenueUSD =
         constants.BIG_DECIMAL_ZERO
+
       financialMetrics.dailyProtocolSideRevenueUSD = constants.BIG_DECIMAL_ZERO
       financialMetrics.cumulativeProtocolSideRevenueUSD =
         constants.BIG_DECIMAL_ZERO
@@ -271,45 +274,6 @@ export namespace metrics {
     metricsHourlySnapshot.save()
   }
 
-  export function updateVaultSnapshotsAfterRevenue(
-    vaultAddress: string,
-    profitAmountUSD: BigDecimal,
-    feeAmountUSD: BigDecimal,
-    block: ethereum.Block
-  ): void {
-    // Update hourly and daily deposit transaction count
-    const vaultDailySnapshot = getOrCreateVaultsDailySnapshots(
-      vaultAddress,
-      block
-    )
-    const vaultHourlySnapshot = getOrCreateVaultsHourlySnapshots(
-      vaultAddress,
-      block
-    )
-
-    vaultDailySnapshot.dailySupplySideRevenueUSD =
-      vaultDailySnapshot.dailySupplySideRevenueUSD.plus(
-        profitAmountUSD.minus(feeAmountUSD)
-      )
-    vaultHourlySnapshot.hourlySupplySideRevenueUSD =
-      vaultHourlySnapshot.hourlySupplySideRevenueUSD.plus(
-        profitAmountUSD.minus(feeAmountUSD)
-      )
-
-    vaultDailySnapshot.dailyProtocolSideRevenueUSD =
-      vaultDailySnapshot.dailyProtocolSideRevenueUSD.plus(feeAmountUSD)
-    vaultHourlySnapshot.hourlyProtocolSideRevenueUSD =
-      vaultHourlySnapshot.hourlyProtocolSideRevenueUSD.plus(feeAmountUSD)
-
-    vaultDailySnapshot.dailyTotalRevenueUSD =
-      vaultDailySnapshot.dailyTotalRevenueUSD.plus(profitAmountUSD)
-    vaultHourlySnapshot.hourlyTotalRevenueUSD =
-      vaultHourlySnapshot.hourlyTotalRevenueUSD.plus(profitAmountUSD)
-
-    vaultDailySnapshot.save()
-    vaultHourlySnapshot.save()
-  }
-
   export function updateFinancials(block: ethereum.Block): void {
     const protocol = YieldAggregator.load(constants.PROTOCOL_ID.toHexString())
 
@@ -318,6 +282,8 @@ export namespace metrics {
     const financialMetrics = getOrCreateFinancialDailySnapshots(block)
 
     financialMetrics.totalValueLockedUSD = protocol.totalValueLockedUSD
+    financialMetrics.protocolControlledValueUSD =
+      protocol.protocolControlledValueUSD
     financialMetrics.cumulativeSupplySideRevenueUSD =
       protocol.cumulativeSupplySideRevenueUSD
     financialMetrics.cumulativeProtocolSideRevenueUSD =
@@ -327,6 +293,27 @@ export namespace metrics {
 
     financialMetrics.blockNumber = block.number
     financialMetrics.timestamp = block.timestamp
+
+    financialMetrics.save()
+  }
+
+  export function updateFinancialsAfterRevenue(
+    profitAmountUSD: BigDecimal,
+    feeAmountUSD: BigDecimal,
+    block: ethereum.Block
+  ): void {
+    const financialMetrics = getOrCreateFinancialDailySnapshots(block)
+
+    financialMetrics.dailySupplySideRevenueUSD =
+      financialMetrics.dailySupplySideRevenueUSD.plus(
+        profitAmountUSD.minus(feeAmountUSD)
+      )
+
+    financialMetrics.dailyProtocolSideRevenueUSD =
+      financialMetrics.dailyProtocolSideRevenueUSD.plus(feeAmountUSD)
+
+    financialMetrics.dailyTotalRevenueUSD =
+      financialMetrics.dailyTotalRevenueUSD.plus(profitAmountUSD)
 
     financialMetrics.save()
   }
@@ -396,5 +383,44 @@ export namespace metrics {
 
     vaultDailySnapshots.save()
     vaultHourlySnapshots.save()
+  }
+
+  export function updateVaultSnapshotsAfterRevenue(
+    vaultAddress: string,
+    profitAmountUSD: BigDecimal,
+    feeAmountUSD: BigDecimal,
+    block: ethereum.Block
+  ): void {
+    // Update hourly and daily deposit transaction count
+    const vaultDailySnapshot = getOrCreateVaultsDailySnapshots(
+      vaultAddress,
+      block
+    )
+    const vaultHourlySnapshot = getOrCreateVaultsHourlySnapshots(
+      vaultAddress,
+      block
+    )
+
+    vaultDailySnapshot.dailySupplySideRevenueUSD =
+      vaultDailySnapshot.dailySupplySideRevenueUSD.plus(
+        profitAmountUSD.minus(feeAmountUSD)
+      )
+    vaultHourlySnapshot.hourlySupplySideRevenueUSD =
+      vaultHourlySnapshot.hourlySupplySideRevenueUSD.plus(
+        profitAmountUSD.minus(feeAmountUSD)
+      )
+
+    vaultDailySnapshot.dailyProtocolSideRevenueUSD =
+      vaultDailySnapshot.dailyProtocolSideRevenueUSD.plus(feeAmountUSD)
+    vaultHourlySnapshot.hourlyProtocolSideRevenueUSD =
+      vaultHourlySnapshot.hourlyProtocolSideRevenueUSD.plus(feeAmountUSD)
+
+    vaultDailySnapshot.dailyTotalRevenueUSD =
+      vaultDailySnapshot.dailyTotalRevenueUSD.plus(profitAmountUSD)
+    vaultHourlySnapshot.hourlyTotalRevenueUSD =
+      vaultHourlySnapshot.hourlyTotalRevenueUSD.plus(profitAmountUSD)
+
+    vaultDailySnapshot.save()
+    vaultHourlySnapshot.save()
   }
 }

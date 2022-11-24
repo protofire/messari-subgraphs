@@ -9,6 +9,7 @@ import { prices } from './utils/prices'
 import { decimals } from './utils'
 import { protocols } from './utils/protocols'
 import { strategies } from './utils/strategies'
+import { metrics } from './utils/metrics'
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   let vaultAddress = call.inputs._vault
@@ -54,6 +55,9 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
     .times(priceUsd)
 
   vault.inputTokenBalance = newInputTokenBalance
+
+  metrics.updateVaultSnapshots(vaultAddress, event.block)
+  metrics.updateFinancials(event.block)
 
   //If theres more input token than before, and the same amount of output token
   //Output token price should be updated
