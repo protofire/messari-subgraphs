@@ -1,6 +1,16 @@
 import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { newMockEvent } from 'matchstick-as'
+import { _Strategy } from '../../../generated/schema'
 import { ProfitLogInReward as ProfitLogInRewardEvent } from '../../../generated/templates/Strategy/Strategy'
+
+export function createStrategy(
+  strategyAddress: Address,
+  vaultAddress: Address
+): void {
+  const strategy = new _Strategy(strategyAddress.toHexString())
+  strategy.vault = vaultAddress.toHexString()
+  strategy.save()
+}
 
 export function createProfitLogInRewardEvent(
   strategyAddress: Address,
