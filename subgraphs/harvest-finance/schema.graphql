@@ -679,10 +679,28 @@ type ActiveAccount @entity {
 }
 
 # Helper entity for tracking strategies associated to a vault
-type _Strategy @entity {
-  " Smart contract address of the strategy"
-  id: ID!
+#type _Strategy @entity {
+#  " Smart contract address of the strategy"
+#  id: ID!
+#
+#  " The vault this strategy belongs to "
+#  vault: Vault
+#}
 
-  " The vault this strategy belongs to "
-  vault: Vault
+type SharePriceChangeLogEntity @entity {
+  id: ID!
+  vault: Vault!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  totalProfit: BigInt!
+  supplySideProfit: BigInt!
+  inputToken: Bytes!
+  inputTokenDecimals: Int!
+  tokenPrice: BigDecimal!
+  oldTVL: BigDecimal!
+  newTVL: BigDecimal!
+  oldCumulativeSupplySideUSD: BigDecimal!
+  newCumulativeSupplySideUSD: BigDecimal!
+  oldCumulativeTotalRevenueUSD: BigDecimal!
+  newCumulativeTotalRevenueUSD: BigDecimal!
 }
