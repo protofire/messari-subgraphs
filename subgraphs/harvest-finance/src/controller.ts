@@ -8,30 +8,38 @@ import { Token, Vault } from '../generated/schema'
 import { prices } from './utils/prices'
 import { decimals } from './utils'
 import { protocols } from './utils/protocols'
-//import { strategies } from './utils/strategies'
 import { metrics } from './utils/metrics'
 import { timestamp } from '../tests/helpers/asserting/deposits'
 import { SharePriceChangeLogEntity } from '../generated/schema'
 
 export function handleAddVaultAndStrategy(call: AddVaultAndStrategyCall): void {
   let vaultAddress = call.inputs._vault
-  //let strategyAddress = call.inputs._strategy
+
   let timestamp = call.block.timestamp
   let blockNumber = call.block.number
 
   vaults.createVault(vaultAddress, timestamp, blockNumber)
-
-  /*
-  let strategy = strategies.getOrCreateStrategy(strategyAddress)
-  strategy.vault = vaultAddress.toHexString()
-  strategy.save()*/
 }
 
 export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
+  // Update order for old values
+  const sharePriceChangeLogEntity = new SharePriceChangeLogEntity(
+    event.transaction.hash.toHexString() + '-' + event.logIndex.toString()
+  )
+
   const vaultAddress = event.params.vault
-  const vault = Vault.load(vaultAddress.toHexString())
+  let vault = Vault.load(vaultAddress.toHexString())
 
   if (!vault) return
+
+  sharePriceChangeLogEntity.vault = vault.id
+  sharePriceChangeLogEntity.timestamp = event.block.timestamp
+  sharePriceChangeLogEntity.blockNumber = event.block.number
+  sharePriceChangeLogEntity.oldTVL = vault.totalValueLockedUSD
+  sharePriceChangeLogEntity.oldCumulativeTotalRevenueUSD =
+    vault.cumulativeTotalRevenueUSD
+  sharePriceChangeLogEntity.oldCumulativeSupplySideUSD =
+    vault.cumulativeSupplySideRevenueUSD
 
   const inputToken = Token.load(vault.inputToken)
 
@@ -44,46 +52,69 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
 
   inputToken.save()
 
-  const oldSharePrice = event.params.oldSharePrice
-  const newSharePrice = event.params.newSharePrice
+  const newInputTokenBalance = vaults.extractInputTokenBalance(vaultAddress)
 
-  let debugSupplySideProfit = newSharePrice.minus(oldSharePrice)
-  let debugTotalProfit = debugSupplySideProfit
-    .times(BigInt.fromI32(100))
-    .div(BigInt.fromI32(70))
+  if (!newInputTokenBalance) return
 
-  const supplySideProfit = decimals.fromBigInt(
-    newSharePrice.minus(oldSharePrice),
+  vault.pricePerShare = decimals.fromBigInt(
+    event.params.newSharePrice,
     inputToken.decimals as u8
   )
 
-  const totalProfit = supplySideProfit
-    .times(BigDecimal.fromString('100'))
-    .div(BigDecimal.fromString('70'))
+  vault.totalValueLockedUSD = decimals
+    .fromBigInt(newInputTokenBalance, inputToken.decimals as u8)
+    .times(priceUsd)
 
-  const profitAmountUSD = prices.getPrice(
-    Address.fromString(inputToken.id),
-    totalProfit
-  )
+  vault.inputTokenBalance = newInputTokenBalance
+  vault.save()
 
-  const feeAmountUSD = prices.getPrice(
-    Address.fromString(inputToken.id),
-    totalProfit.minus(supplySideProfit)
-  )
+  const oldSharePrice = event.params.oldSharePrice
+  const newSharePrice = event.params.newSharePrice
 
-  const sharePriceChangeLogEntity = new SharePriceChangeLogEntity(
-    event.transaction.hash.toHexString() + '-' + event.logIndex.toString()
-  )
+  const supplyAuxProfit = newSharePrice.minus(oldSharePrice)
 
-  sharePriceChangeLogEntity.vault = vault.id
-  sharePriceChangeLogEntity.timestamp = event.block.timestamp
-  sharePriceChangeLogEntity.blockNumber = event.block.number
-  sharePriceChangeLogEntity.oldTVL = vault.totalValueLockedUSD
-  sharePriceChangeLogEntity.oldCumulativeTotalRevenueUSD =
-    vault.cumulativeTotalRevenueUSD
+  let supplySideProfit: BigDecimal
+  let totalProfit: BigDecimal
+  let profitAmountUSD: BigDecimal
+  let feeAmountUSD: BigDecimal
 
-  sharePriceChangeLogEntity.oldCumulativeSupplySideUSD =
-    vault.cumulativeSupplySideRevenueUSD
+  if (supplyAuxProfit <= BigInt.fromI32(0)) {
+    supplySideProfit = BigDecimal.fromString('0')
+    totalProfit = BigDecimal.fromString('0')
+    profitAmountUSD = BigDecimal.fromString('0')
+    feeAmountUSD = BigDecimal.fromString('0')
+  } else {
+    const auxSupplySideProfit = supplyAuxProfit
+      .times(vault.outputTokenSupply!)
+      .div(BigInt.fromI32(10).pow(inputToken.decimals as u8))
+
+    supplySideProfit = decimals.fromBigInt(
+      auxSupplySideProfit,
+      inputToken.decimals as u8
+    )
+
+    totalProfit = supplySideProfit
+      .times(BigDecimal.fromString('100'))
+      .div(BigDecimal.fromString('70'))
+
+    profitAmountUSD = prices.getPrice(
+      Address.fromString(inputToken.id),
+      totalProfit
+    )
+
+    feeAmountUSD = prices.getPrice(
+      Address.fromString(inputToken.id),
+      totalProfit.minus(supplySideProfit)
+    )
+  }
+
+  let debugSupplySideProfit = supplyAuxProfit
+    .times(vault.outputTokenSupply!)
+    .div(BigInt.fromI32(10).pow(inputToken.decimals as u8))
+
+  let debugTotalProfit = debugSupplySideProfit
+    .times(BigInt.fromI32(100))
+    .div(BigInt.fromI32(70))
 
   sharePriceChangeLogEntity.totalProfit = debugTotalProfit
   sharePriceChangeLogEntity.supplySideProfit = debugSupplySideProfit
@@ -106,7 +137,8 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
   sharePriceChangeLogEntity.newCumulativeSupplySideUSD =
     vault.cumulativeSupplySideRevenueUSD
 
-  protocols.updateRevenue(vault.protocol, profitAmountUSD, feeAmountUSD)
+  sharePriceChangeLogEntity.newTVL = vault.totalValueLockedUSD
+  sharePriceChangeLogEntity.save()
 
   metrics.updateVaultSnapshotsAfterRevenue(
     vaultAddress.toHexString(),
@@ -121,31 +153,9 @@ export function handleSharePriceChangeLog(event: SharePriceChangeLog): void {
     event.block
   )
 
-  vault.pricePerShare = decimals.fromBigInt(
-    event.params.newSharePrice,
-    inputToken.decimals as u8
-  )
-
-  const newInputTokenBalance = vaults.extractInputTokenBalance(vaultAddress)
-
-  if (!newInputTokenBalance) return
-
-  vault.totalValueLockedUSD = decimals
-    .fromBigInt(newInputTokenBalance, inputToken.decimals as u8)
-    .times(priceUsd)
-
-  vault.inputTokenBalance = newInputTokenBalance
-
   metrics.updateVaultSnapshots(vaultAddress, event.block)
   metrics.updateFinancials(event.block)
 
-  //If theres more input token than before, and the same amount of output token
-  //Output token price should be updated
-
-  vault.save()
-
-  sharePriceChangeLogEntity.newTVL = vault.totalValueLockedUSD
-  sharePriceChangeLogEntity.save()
-
+  protocols.updateRevenue(vault.protocol, profitAmountUSD, feeAmountUSD)
   protocols.updateTotalValueLockedUSD(vault.protocol)
 }
